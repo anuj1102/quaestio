@@ -1,0 +1,20 @@
+types:
+  PlayerInfo:
+    name: string
+    score: number
+  PlayerState:
+    currentPlayer: string
+    players: PlayerInfo[]
+methods:
+  createGame:
+  joinGame:
+  answerQuestion:
+    answer: string
+auth:
+  anonymous:
+    separator: "-"
+tick: true
+
+userState: PlayerState
+initialize: createGame
+error: string

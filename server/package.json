@@ -1,0 +1,8 @@
+{
+  "name": "quaestio-server",
+  "version": "0.0.1",
+  "type": "module",
+  "devDependencies": {
+    "ts-node": "^9.1.1"
+  }
+}

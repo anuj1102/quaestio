@@ -5,6 +5,7 @@ types:
   PlayerState:
     currentPlayer: string
     players: PlayerInfo[]
+    question_timeout: number
 methods:
   createGame:
   joinGame:

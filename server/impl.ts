@@ -10,14 +10,19 @@ import {
 
 interface InternalState {
   players: PlayerInfo[];
+  question_timeout: number;
 }
 
 var tick = 0;
+var secs = 0;
+
+const DEFAULT_TIMEOUT = 10;
 
 export class Impl implements Methods<InternalState> {
   createGame(user: UserData, ctx: Context, request: ICreateGameRequest): InternalState {
     return {
-      players: []
+      players: [],
+      question_timeout: DEFAULT_TIMEOUT,
     };
   }
   joinGame(state: InternalState, user: UserData, ctx: Context, request: IJoinGameRequest): Result {
@@ -41,14 +46,24 @@ export class Impl implements Methods<InternalState> {
     return {
       currentPlayer: user.name,
       players: state.players,
+      question_timeout: state.question_timeout,
     };
+  }
+  onSec(state: InternalState) {
+    console.log(`here: ${state.question_timeout}`)
+    state.question_timeout -= 1;
+    if(state.question_timeout == 0 ) {
+      state.question_timeout = DEFAULT_TIMEOUT;
+    }
+
   }
   onTick(state: InternalState, ctx: Context, timeDelta: number): Result {
     tick += timeDelta;
     if (tick >= 1) {
       tick = 0;
-      console.log(`hsdf: ${tick}`);
+      secs += 1;
+      this.onSec(state);
     }
-    return Result.unmodified();
+    return Result.modified();
   }
 }

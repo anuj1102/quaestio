@@ -15,17 +15,20 @@ class Question {
   difficulty: string;
   question: string;
   correct_answer: string;
+  incorrect_answers: string[];
 
   constructor(category: string,
               question_type: string,
               difficulty: string,
               question: string,
-              correct_answer: string) {
+              correct_answer: string,
+              incorrect_answers: string[]) {
     this.category = category;
     this.question_type = question_type;
     this.difficulty = difficulty;
     this.question = question;
     this.correct_answer = correct_answer;
+    this.incorrect_answers = incorrect_answers;
   }
 }
 
@@ -83,15 +86,21 @@ export class Impl implements Methods<InternalState> {
     };
   }
   loadQuestions() : Question[] {
-    axios.get('https://opentdb.com/api.php?amount=10&category=23&difficulty=easy&type=multiple')
+    /* axios.get('https://opentdb.com/api.php?amount=10&category=23&difficulty=easy&type=multiple') */
+    axios.get('https://opentdb.com/api.php', { params: {
+      amount: 10,
+      category: 23,
+      difficulty: 'easy',
+      type: 'multiple',
+    }})
     .then(function (response) {
-      console.log(response.data);
-      var res = response.data.results.map ((q: any) => new Question(
+      console.log(response.data.results[0].incorrect_answers); var res = response.data.results.map ((q: any) => new Question(
         q['category'],
         q['type'],
         q['difficulty'],
         q['question'],
         q['correct_answer'],
+        q['incorrect_answers']
       ));
       console.log(res);
       return res;

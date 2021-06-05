@@ -9,9 +9,31 @@ import {
 } from "./.rtag/types";
 import axios from 'axios';
 
+class Question {
+  category: string;
+  question_type: string;
+  difficulty: string;
+  question: string;
+  correct_answer: string;
+
+  constructor(category: string,
+              question_type: string,
+              difficulty: string,
+              question: string,
+              correct_answer: string) {
+    this.category = category;
+    this.question_type = question_type;
+    this.difficulty = difficulty;
+    this.question = question;
+    this.correct_answer = correct_answer;
+  }
+}
+
 interface InternalState {
   players: PlayerInfo[];
   question_timeout: number;
+  current_question: string;
+  all_questions: Question[];
 }
 
 
@@ -25,6 +47,8 @@ export class Impl implements Methods<InternalState> {
     return {
       players: [],
       question_timeout: DEFAULT_TIMEOUT,
+      current_question: "",
+      all_questions: this.loadQuestions(),
     };
   }
   joinGame(state: InternalState, user: UserData, ctx: Context, request: IJoinGameRequest): Result {
@@ -35,6 +59,13 @@ export class Impl implements Methods<InternalState> {
     return Result.modified();
   }
   answerQuestion(state: InternalState, user: UserData, ctx: Context, request: IAnswerQuestionRequest): Result {
+
+    if(state.all_questions.length === 0) {
+      state.all_questions = this.loadQuestions();
+    }
+
+    state.current_question = state.all_questions[0].category
+
     var player = state.players.find((p) => p.name === user.name);
     if (player === undefined) {
       return Result.unmodified("Invalid player");
@@ -51,27 +82,34 @@ export class Impl implements Methods<InternalState> {
       question_timeout: state.question_timeout,
     };
   }
-  loadQuestions(state: InternalState) {
-    axios.get('https://opentdb.com/api.php?amount=50&category=23&difficulty=easy&type=multiple')
+  loadQuestions() : Question[] {
+    axios.get('https://opentdb.com/api.php?amount=10&category=23&difficulty=easy&type=multiple')
     .then(function (response) {
       console.log(response.data);
+      var res = response.data.results.map ((q: any) => new Question(
+        q['category'],
+        q['type'],
+        q['difficulty'],
+        q['question'],
+        q['correct_answer'],
+      ));
+      console.log(res);
+      return res;
     })
     .catch(function (error) {
       // handle error
       console.log(error);
-    })
-    .then(function () {
-    // always executed
+      return [];
     });
+    return [];
   }
   onSec(state: InternalState) {
     console.log(`here: ${state.question_timeout}`)
+    console.log(`here: ${state.all_questions}`)
     state.question_timeout -= 1;
     if(state.question_timeout == 0 ) {
-      this.loadQuestions(state);
       state.question_timeout = DEFAULT_TIMEOUT;
     }
-
   }
   onTick(state: InternalState, ctx: Context, timeDelta: number): Result {
     tick += timeDelta;

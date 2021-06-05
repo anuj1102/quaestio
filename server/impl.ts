@@ -7,11 +7,13 @@ import {
   IJoinGameRequest,
   IAnswerQuestionRequest,
 } from "./.rtag/types";
+import axios from 'axios';
 
 interface InternalState {
   players: PlayerInfo[];
   question_timeout: number;
 }
+
 
 var tick = 0;
 var secs = 0;
@@ -49,10 +51,24 @@ export class Impl implements Methods<InternalState> {
       question_timeout: state.question_timeout,
     };
   }
+  loadQuestions(state: InternalState) {
+    axios.get('https://opentdb.com/api.php?amount=50&category=23&difficulty=easy&type=multiple')
+    .then(function (response) {
+      console.log(response.data);
+    })
+    .catch(function (error) {
+      // handle error
+      console.log(error);
+    })
+    .then(function () {
+    // always executed
+    });
+  }
   onSec(state: InternalState) {
     console.log(`here: ${state.question_timeout}`)
     state.question_timeout -= 1;
     if(state.question_timeout == 0 ) {
+      this.loadQuestions(state);
       state.question_timeout = DEFAULT_TIMEOUT;
     }
 

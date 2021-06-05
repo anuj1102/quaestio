@@ -12,6 +12,8 @@ interface InternalState {
   players: PlayerInfo[];
 }
 
+var tick = 0;
+
 export class Impl implements Methods<InternalState> {
   createGame(user: UserData, ctx: Context, request: ICreateGameRequest): InternalState {
     return {
@@ -42,7 +44,11 @@ export class Impl implements Methods<InternalState> {
     };
   }
   onTick(state: InternalState, ctx: Context, timeDelta: number): Result {
-    console.log("Asdf");
+    tick += timeDelta;
+    if (tick >= 1) {
+      tick = 0;
+      console.log(`hsdf: ${tick}`);
+    }
     return Result.unmodified();
   }
 }

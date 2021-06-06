@@ -6,8 +6,6 @@ A simple QuizUp inspired trivia game built with
 
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
-
 ```bash
 git clone https://github.com/anuj1102/quaestio.git
 cd quaestio

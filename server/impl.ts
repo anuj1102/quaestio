@@ -131,6 +131,7 @@ export class Impl implements Methods<InternalState> {
     state.choices = q_info.incorrect_answers;
     state.choices.push(q_info.correct_answer);
     state.choices.sort();
+    state.question_timeout = DEFAULT_TIMEOUT;
   }
   onSec(state: InternalState) {
     state.question_timeout -= 1;

@@ -51,10 +51,11 @@ export class Impl implements Methods<InternalState> {
       players: [],
       question_timeout: DEFAULT_TIMEOUT,
       current_question: "",
-      all_questions: this.loadQuestions(),
+      all_questions: [],
     };
   }
   joinGame(state: InternalState, user: UserData, ctx: Context, request: IJoinGameRequest): Result {
+    this.loadQuestions(state);
     if (state.players.find((player) => player.name === user.name)) {
       return Result.unmodified("Already joined");
     }
@@ -62,13 +63,6 @@ export class Impl implements Methods<InternalState> {
     return Result.modified();
   }
   answerQuestion(state: InternalState, user: UserData, ctx: Context, request: IAnswerQuestionRequest): Result {
-
-    if(state.all_questions.length === 0) {
-      state.all_questions = this.loadQuestions();
-    }
-
-    state.current_question = state.all_questions[0].category
-
     var player = state.players.find((p) => p.name === user.name);
     if (player === undefined) {
       return Result.unmodified("Invalid player");
@@ -83,18 +77,23 @@ export class Impl implements Methods<InternalState> {
       currentPlayer: user.name,
       players: state.players,
       question_timeout: state.question_timeout,
+      current_question: state.current_question,
     };
   }
-  loadQuestions() : Question[] {
-    /* axios.get('https://opentdb.com/api.php?amount=10&category=23&difficulty=easy&type=multiple') */
-    axios.get('https://opentdb.com/api.php', { params: {
+  loadQuestions(state: InternalState) {
+    if (state.all_questions.length != 0) {
+      return;
+    }
+
+    return axios.get('https://opentdb.com/api.php', { params: {
       amount: 10,
       category: 23,
       difficulty: 'easy',
       type: 'multiple',
     }})
     .then(function (response) {
-      console.log(response.data.results[0].incorrect_answers); var res = response.data.results.map ((q: any) => new Question(
+      console.log(response.data.results[0].incorrect_answers);
+      state.all_questions = response.data.results.map ((q: any) => new Question(
         q['category'],
         q['type'],
         q['difficulty'],
@@ -102,19 +101,15 @@ export class Impl implements Methods<InternalState> {
         q['correct_answer'],
         q['incorrect_answers']
       ));
-      console.log(res);
-      return res;
+      state.current_question = state.all_questions[0].question;
     })
     .catch(function (error) {
-      // handle error
+      throw new Error('Error loading questions');
       console.log(error);
-      return [];
     });
-    return [];
   }
   onSec(state: InternalState) {
     console.log(`here: ${state.question_timeout}`)
-    console.log(`here: ${state.all_questions}`)
     state.question_timeout -= 1;
     if(state.question_timeout == 0 ) {
       state.question_timeout = DEFAULT_TIMEOUT;

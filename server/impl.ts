@@ -60,6 +60,7 @@ export class Impl implements Methods<InternalState> {
     if (state.players.find((player) => player.name === user.name)) {
       return Result.unmodified("Already joined");
     }
+
     state.players.push({name: user.name, score: 0});
     return Result.modified();
   }
@@ -67,6 +68,10 @@ export class Impl implements Methods<InternalState> {
     var player = state.players.find((p) => p.name === user.name);
     if (player === undefined) {
       return Result.unmodified("Invalid player");
+    }
+
+    if (request.answer !== state.all_questions[0].correct_answer) {
+      return Result.unmodified();
     }
 
     player.score += 1
